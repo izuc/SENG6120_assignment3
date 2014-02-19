@@ -1,0 +1,138 @@
+// Filename: BTNode.template
+// Date Created: 26/10/2012
+// Author: Lance Baker
+// Course: SENG6120
+// Student Number: c3128034
+#include <cstdlib>
+
+namespace lance_project {
+	// The default constructor.
+	template <class T>
+	BTNode<T>::BTNode() {
+		this->data = NULL;
+		this->left = NULL;
+		this->right = NULL;
+	}
+	
+	// The constructor accepts the data.
+	template <class T>
+	BTNode<T>::BTNode(T* data) {
+		this->data = data;
+		this->left = NULL;
+		this->right = NULL;
+	}
+
+	// The constructor accepts the data, left node, and right node,
+	template <class T>
+	BTNode<T>::BTNode(T* data, BTNode<T>* left, BTNode<T>* right) {
+		this->data = data;
+		this->left = left;
+		this->right = right;
+	}
+	
+	// The destructor destroys the object attributes.
+	template <class T>
+	BTNode<T>::~BTNode() {
+		delete this->data;
+		delete this->left;
+		delete this->right;
+	}
+
+	template <class T>
+	BTNode<T>* BTNode<T>::remove(BTNode<T>* parent, T* item) {
+		// Compares the item with the current object.
+		int comparison = item->compareTo(this->getData());
+		// If the comparison matches.
+		if (comparison == 0) {
+			// If the node has both children.
+			if ((this->getLeft() != NULL) && (this->getRight() != NULL)) {
+				// It then sets the data to the smallest object on right branch.
+				this->setData(this->getRight()->min());
+				// Then removes the object.
+				return this->getRight()->remove(this, this->getData());
+			// Otherwise, the node only has one or none.
+			} else {
+				// If the current node is on the left branch.
+				if (parent->getLeft() == this) {
+					// It removes the object by setting it to (on the parent) with the current left node, 
+					// therefore it just cuts the node out. If the left node doesn't exist it uses the right.
+					parent->setLeft((this->getLeft() != NULL) ? this->getLeft() : this->getRight());
+					return this; // Returns this object.
+				// If the current node is on the right branch.
+				} else if (parent->getRight() == this) {
+					// It removes the object by setting it to (on the parent) with the left node (if it exists),
+					// or it uses the right. So therefore it just cuts the node out.
+					parent->setRight((this->getLeft() != NULL) ? this->getLeft() : this->getRight());
+					return this; // Returns this object.
+				}
+			}
+		// If the item is less than the node data.
+		} else if (comparison < 0) {
+			// If the left branch exists.
+			if (this->getLeft() != NULL) {
+				// Traverses further down the left branch, passing
+				// this object as the parent, and the item that is being searched.
+				return this->getLeft()->remove(this, item);
+			}
+		// If the item is greater than the node data.
+		} else if (comparison > 0) {
+			// If the right branch exists.
+			if (this->getRight() != NULL) {
+				// It then traverses further down towards the right,
+				// passing this object as the parent, and the item.
+				return this->getRight()->remove(this, item);
+			}
+		}
+		return NULL; // The item couldn't be found.
+	}
+	
+	// The min method is invoked by the remove method. It is used to 
+	// fetch the smallest connected node object (which is the one on the far left branch).
+	template <class T>
+	T* BTNode<T>::min() {
+		// If the left branch doesn't have a connected node.
+		if (this->getLeft() == NULL) {
+			// Then it is the furthest down the left, so it returns the data object.
+			return this->getData();
+		} else {
+			// Otherwise, it will traverse down to the next node by invoking the same method.
+			return this->getLeft()->min();
+		}
+	}
+
+	// Setter for the data.
+	template <class T>
+	void BTNode<T>::setData(T* data) {
+		this->data = data;
+	}
+
+	// Setter for the left branch.
+	template <class T>
+	void BTNode<T>::setLeft(BTNode<T>* left) {
+		this->left = left;
+	}
+	
+	// Setter for the right branch.
+	template <class T>
+	void BTNode<T>::setRight(BTNode<T>* right) {
+		this->right = right;
+	}
+
+	// Getter for the data.
+	template <class T>
+	T* BTNode<T>::getData() {
+		return this->data;
+	}
+
+	// Getter for the left branch.
+	template <class T>
+	BTNode<T>* BTNode<T>::getLeft() {
+		return this->left;
+	}
+	
+	// Getter for the right branch.
+	template <class T>
+	BTNode<T>* BTNode<T>::getRight() {
+		return this->right;
+	}
+}

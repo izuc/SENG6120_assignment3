@@ -1,0 +1,170 @@
+// Filename: BTree.template
+// Date Created: 26/10/2012
+// Author: Lance Baker
+// Course: SENG6120
+// Student Number: c3128034
+
+#include <iostream>
+#include <cstdlib>
+#include "BTNode.h"
+using namespace std;
+
+namespace lance_project {
+	// The default constructor.
+	template <class T>
+	BTree<T>::BTree() {
+		this->root = NULL;
+	}
+	
+	template <class T>
+	void BTree<T>::print(BTNode<T>* node) {
+		// Ensures the received node is not null.
+		if (node != NULL) {
+			// Traverses down the left 
+			// branch invoking the same method.
+			this->print(node->getLeft());
+			// Prints out the data.
+			cout << node->getData() << endl;
+			// Traverses down the right 
+			// branch invoking the same method.
+			this->print(node->getRight());
+		}
+	}
+	
+	template <class T>
+	void BTree<T>::insert(T* item) {
+		// If the root is null, 
+		// it instantiates a new node containing the item, 
+		// assigning it to the root.
+		if (this->root == NULL) {
+			this->root = new BTNode<T>(item);
+		} else {
+			// Otherwise, it invokes the recursive add method passing the root & the item.
+			this->add(this->root, item);
+		}
+	}
+	
+	template<class T>
+	void BTree<T>::remove(T* item) {
+		// Ensures the root is not null.
+		if (this->root != NULL) {
+			// If the item matches the root data, 
+			// then it is the root element that needs to be removed.
+			if (item->compareTo(this->root->getData()) == 0) {
+				// Creates a new parent node.
+				BTNode<T>* parent = new BTNode<T>();
+				parent->setLeft(this->root);
+				// Invokes the remove method on the root, with the parent & item passed as arguments.
+				this->root->remove(parent, item);
+			} else {
+				// Otherwise, the item will need to be found to get removed.
+				// It invokes the remove method passing the item as an argument, and once removed decrements the size.
+				this->root->remove(NULL, item);
+			}
+		}
+	}
+	
+	template <class T>
+	T* BTree<T>::search(BTNode<T>* node, T* item) {
+		// Ensures the received node is not null.
+		if (node != NULL) {
+			// Compares the item with the node data.
+			int comparison = item->compareTo(node->getData());
+			// If it matches then returns the node data.
+			if (comparison == 0) {
+				return node->getData();
+			// If the item is less than the node data, it will
+			// traverse down the left branch.
+			} else if (comparison < 0) {
+				// Invokes the same method passing the left node.
+				return this->search(node->getLeft(), item);
+			// If the item is greater than the node data, it will
+			// traverse down the right branch.
+			} else if (comparison > 0) {
+				// Invokes the same method passing the right node.
+				return this->search(node->getRight(), item);
+			}
+		}
+		return NULL;
+	}
+	
+	template <class T>
+	int BTree<T>::calcSearchDepth(BTNode<T>* node, T* item, int depth = 0) {
+		// Ensures the node is not null.
+		if (node != NULL) {
+			// Compares the received item with the node data.
+			int comparison = item->compareTo(node->getData());
+			if (comparison == 0) { // If it is a match.
+				return ++depth; // Returns the incremented depth.
+			} else if (comparison < 0) { // If the item is less than the node data.
+				// It then traverses down the left branch, incrementing the depth.
+				return this->calcSearchDepth(node->getLeft(), item, ++depth);
+			} else if (comparison > 0) { // If the item is greater than the node data.
+				// It then traverses down the right branch, incrementing the depth.
+				return this->calcSearchDepth(node->getRight(), item, ++depth);
+			}
+		}
+		return depth; // Returns the depth.
+	}
+	
+	template <class T>
+	void BTree<T>::add(BTNode<T>* node, T* item) {
+		// Compares the item with the node data.
+		int comparison = item->compareTo(node->getData());
+		// If the item is less than the node data.
+		if (comparison < 0) {
+			// If there isn't any other nodes towards the left.
+			if (node->getLeft() == NULL) {
+				// It then sets the left branch with a new node 
+				// containing the item.
+				node->setLeft(new BTNode<T>(item));
+			} else {
+				// Otherwise, it traverses further down the left branch.
+				this->add(node->getLeft(), item);
+			}
+		// If the item is greater than the node data.
+		} else if (comparison > 0) {
+			// If the right branch doesn't have a node.
+			if (node->getRight() == NULL) {
+				// Sets the right branch with a new instance of node
+				// containing the item.
+				node->setRight(new BTNode<T>(item));
+			} else {
+				// Otherwise, it traverses further down the right branch.
+				this->add(node->getRight(), item);
+			}
+		}
+	}
+	
+	template <class T>
+	// Setter for the root.
+	void BTree<T>::setRoot(BTNode<T>* root) {
+		this->root = root;
+	}
+	
+	template <class T>
+	// Getter for the root.
+	BTNode<T>* BTree<T>::getRoot() {
+		return this->root;
+	}
+	
+	template <class T>
+	// Calculates the size.
+	int BTree<T>::calcSize(BTNode<T>* node) {
+		int size = 0;
+		if (node != NULL) {
+			size++;
+			// traverses down the left branch, adding the returned size
+			size += this->calcSize(node->getLeft());
+			// traverses down the right branch, adding the returned size
+			size += this->calcSize(node->getRight());
+		}
+		return size; // returns the size.
+	}
+	
+	template <class T>
+	// Getter for the size.
+	int BTree<T>::getSize() {
+		return this->calcSize(this->root);
+	}
+}
